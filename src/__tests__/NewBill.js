@@ -14,18 +14,21 @@ import { Router } from "express"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on NewBill Page", () => {
-    test("Then bill icon in vertical layout should be highlighted", async () => {
+    test("Then mail icon in vertical layout should be highlighted", async () => {
       Object.defineProperty(window, 'localStorage', { value: localStorageMock})
       window.localStorage.setItem("user", JSON.stringify({type:'Employee'}))
       const root = document.createElement("div")
       root.setAttribute("id", "root")
       document.body.append(root)
+      //Navigation et chargement de page
       const pathname = ROUTES_PATH["NewBill"]
       root.innerHTML = ROUTES({ pathname: pathname, loading:true})
       document.getElementById("layout-icon1").classList.remove("active-icon")
       document.getElementById("layout-icon2").classList.add("active-icon")
+      //Récupération de l'icône
       await waitFor(() => screen.getByTestId('icon-mail'))
       const mailIcon = screen.getByTestId("icon-mail")
+      //Vérification de la classe "active-icon"
       const iconActivated = mailIcon.classList.contains("active-icon")
       expect(iconActivated).toBeTruthy()
     })
@@ -38,10 +41,13 @@ describe("Given I am connected as an employee", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({pathname})
       }
+      //Initialisation
       const newBill = new NewBill({document, onNavigate, store: null, localStorage: window.localStorage})
+      //Sélection du fichier
       const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e))
       const input = screen.getByTestId("file")
       input.addEventListener("change", handleChangeFile)
+      //Mauvais format
       fireEvent.change(input, {
         target: {
           files : [
@@ -63,11 +69,21 @@ describe("Given I am connected as an employee", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({pathname})
       }
+      //Initialisation
       const newBill = new NewBill({document, onNavigate, store, localStorage: window.localStorage})
       const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e))
       const input = screen.getByTestId("file")
       input.addEventListener("change", handleChangeFile)
-      fireEvent.change(input, {target :{ files: [new File(["image.png"], "image.png", {type : "image/png"})]}})
+      //Bon format
+      fireEvent.change(input, {
+        target: {
+          files: [
+            new File(["image.png"], "image.png", {
+              type : "image/png"
+            })
+          ]
+        }
+      })
       expect(handleChangeFile).toHaveBeenCalled()
       expect(input.files[0].name).toBe("image.png")
     })
@@ -77,7 +93,9 @@ describe("Given I am connected as an employee", () => {
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({pathname})
       }
+      //Initialisation
       const newBill = new NewBill({document, onNavigate, store: null, localStorage: window.localStorage})
+      //Submit
       const handleSubmit = jest.fn((e) => newBill.handleSubmit(e))
       const submit = screen.getByTestId("form-new-bill")
       submit.addEventListener("submit", handleSubmit)
@@ -87,10 +105,13 @@ describe("Given I am connected as an employee", () => {
   })
 })
 
+//Test d'intégration (POST)
+
 describe("Given I am a user connected as Employee", () => {
   describe("When I add a new bill", () => {
     test("Then it creates a new bill", () => {
       document.body.innerHTML = NewBillUI()
+      //Initialisation des champs Bills
       const inputData = {
         type: "Transports",
         name: "test",
@@ -101,6 +122,7 @@ describe("Given I am a user connected as Employee", () => {
         commentary: "test",
         file: new File(["test"], "test.png", {type: "image/png"})
       }
+      //On récupère les éléments
       const formNewBill = screen.getByTestId("form-new-bill")
       const inputExpenseName = screen.getByTestId("expense-name")
       const inputExpenseType = screen.getByTestId("expense-type")
@@ -111,6 +133,7 @@ describe("Given I am a user connected as Employee", () => {
       const inputCommentary = screen.getByTestId("commentary")
       const inputFile = screen.getByTestId("file")
 
+      //On simule les valeurs
       fireEvent.change(inputExpenseName, {
         target: {value: inputData.name}
       })
@@ -150,16 +173,20 @@ describe("Given I am a user connected as Employee", () => {
       expect(inputFile.files[0]).toStrictEqual(inputData.file)
       expect(inputFile.files).toHaveLength(1)
 
+      //On rempli localStorage avec les données de formulaire
       Object.defineProperty(window, "localStorage", {
         value : { getItem: jest.fn(() => JSON.stringify({email: "email@test.com",}))},
         writable: true
       })
-
+      //On simule la navigation
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({pathname})
       }
 
+      //Initialisation
       const newBill = new NewBill({document, onNavigate, localStorage: window.localStorage})
+
+      //On déclenche l'évènement
       const handleSubmit = jest.fn(newBill.handleSubmit)
       formNewBill.addEventListener("submit", handleSubmit)
       fireEvent.submit(formNewBill)

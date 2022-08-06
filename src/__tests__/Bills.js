@@ -24,9 +24,10 @@ describe("Given I am connected as an employee", () => {
       document.body.append(root)
       router()
       window.onNavigate(ROUTES_PATH.Bills)
+      //On récupère l'icône
       await waitFor(() => screen.getByTestId('icon-window'))
       const windowIcon = screen.getByTestId('icon-window')
-      //to-do write expect expression 
+      //Vérification de la classe "active-icon"
       const activeIcon = windowIcon.classList.contains("active-icon") 
       expect(activeIcon).toBeTruthy();
     })
@@ -56,12 +57,12 @@ describe("Given I am connected as an employee", () => {
         store,
         localStorage: window.localStorage,
       })
-      //Sim modal 
+      //Simulation de la modale 
       $.fn.modal = jest.fn();
       const icon = screen.getAllByTestId("icon-eye")[0];
       const handleClickIconEye = jest.fn(() => billsList.handleClickIconEye(icon))
       icon.addEventListener("click", handleClickIconEye)
-      //evenement
+      //On déclenche l'évènement
       fireEvent.click(icon)
       expect(handleClickIconEye).toHaveBeenCalled()
       const modale = document.getElementById("modaleFile")
@@ -83,7 +84,7 @@ describe("Given I am connected as an employee", () => {
       document.body.append(root)
       router()
       window.onNavigate(ROUTES_PATH.Bills)
-  
+      //Initialisation
       const store = null
       const billsList= new Bills({
         document,
@@ -91,7 +92,6 @@ describe("Given I am connected as an employee", () => {
         store,
         localStorage: window.localStorage, 
       })
-      
       const newBill = jest.fn(() => billsList.handleClickNewBill)
       const navigButton = screen.getByTestId("btn-new-bill")
       navigButton.addEventListener("click", newBill)
@@ -101,6 +101,7 @@ describe("Given I am connected as an employee", () => {
   })
 })
 
+//Test d'intégration (GET)
 describe("Given I am a user connected as Employee", () => {
   describe("When I navigate to the Bills page", () => {
     test("fetches bills from mock API GET", () => {
@@ -110,10 +111,12 @@ describe("Given I am a user connected as Employee", () => {
       document.body.append(root)
       router()
       window.onNavigate(ROUTES_PATH.Bills)
+      //mock bills
       const bills = new Bills({
         document, onNavigate, localStorage,
       })
       bills.getBills((data) => {
+        root.innerHTML = BillsUI({ data })
         expect(document.querySelector("tbody").rows.length).toBeGreaterThan(0)
       })
     })

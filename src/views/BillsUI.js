@@ -25,12 +25,11 @@ const rows = (data) => {
 
   if (data && data.length) {
     data.sort((a, b) => {
-      const dateA = Date.parse(a.date);
-      const dateB = Date.parse(b.date);
-      return dateA === dateB ? 0 : dateA < dateB ? 1 : -1;
+      return new Date(b.date) - new Date(a.date);
     })
+    return data.map((bill) => row(bill)).join("")
   }
-  return (data && data.length) ? data.map(bill => row(bill)).join("") : ""
+  return ""
 }
 
 export default ({ data: bills, loading, error }) => {
